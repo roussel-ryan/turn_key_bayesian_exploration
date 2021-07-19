@@ -1,0 +1,80 @@
+import torch
+import gpytorch
+from gpytorch.models import ApproximateGP
+from gpytorch.variational import CholeskyVariationalDistribution
+from gpytorch.variational import VariationalStrategy
+
+from botorch.models.gpytorch import BatchedMultiOutputGPyTorchModel
+
+
+class GPClassificationModel(ApproximateGP, BatchedMultiOutputGPyTorchModel):
+
+    _num_outputs = 1
+    
+    def __init__(self, train_x):
+        variational_distribution = CholeskyVariationalDistribution(train_x.size(0))
+        variational_strategy = VariationalStrategy(
+            self, train_x, variational_distribution, learn_inducing_locations = True)
+        super(GPClassificationModel, self).__init__(variational_strategy)
+
+        self.mean_module = gpytorch.means.ConstantMean()
+        self.covar_module = gpytorch.kernels.ScaleKernel(
+            gpytorch.kernels.MaternKernel(ard_num_dims = train_x.size(1)))
+        
+    def forward(self, x):
+        mean_x = self.mean_module(x)
+        covar_x = self.covar_module(x)
+        latent_pred = gpytorch.distributions.MultivariateNormal(mean_x, covar_x)
+        return latent_pred
+
+class NNManifold(torch.nn.Sequential):
+    def __init__(self):
+        super(NNManifold, self).__init__()
+        self.add_module('linear1', torch.nn.Linear(2,4))
+        self.add_module('TanH', torch.nn.Tanh())
+        self.add_module('linear2', torch.nn.Linear(4,2))
+        self.add_module('TanH', torch.nn.Tanh())
+        
+class NNManifoldGPModel(gpytorch.models.ExactGP, BatchedMultiOutputGPyTorchModel):
+    _num_outputs = 1
+
+    def __init__(self, train_x, train_y, likelihood):
+        super(NNManifoldGPModel, self).__init__(train_x, train_y, likelihood)
+        
+        
+        self.mean_module = gpytorch.means.ConstantMean()
+        self.covar_module = gpytorch.kernels.ScaleKernel(
+            gpytorch.kernels.MaternKernel(ard_num_dims = 2))
+
+        self.manifold = NNManifold()
+
+        
+    def forward(self, x):
+        #transform x to intermediate space
+        inter_x = self.manifold(x)
+        
+        mean = self.mean_module(inter_x)
+        covar = self.covar_module(inter_x)
+
+        return gpytorch.distributions.MultivariateNormal(mean, covar)
+
+class ExactGPModel(gpytorch.models.ExactGP, BatchedMultiOutputGPyTorchModel):
+    _num_outputs = 1
+
+    def __init__(self, train_x, train_y, likelihood):
+        super(ExactGPModel, self).__init__(train_x, train_y, likelihood)
+        
+        
+        self.mean_module = gpytorch.means.ConstantMean()
+        self.covar_module = gpytorch.kernels.ScaleKernel(
+            gpytorch.kernels.MaternKernel(ard_num_dims = 2))
+
+        
+    def forward(self, x):
+        #transform x to intermediate space
+        inter_x = x
+        
+        mean = self.mean_module(inter_x)
+        covar = self.covar_module(inter_x)
+
+        return gpytorch.distributions.MultivariateNormal(mean, covar)

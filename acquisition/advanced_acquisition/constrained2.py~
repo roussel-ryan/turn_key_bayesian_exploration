@@ -1,0 +1,52 @@
+import torch
+from torch.distributions import Normal
+from botorch.acquisition import analytic 
+from botorch.acquisition import acquisition
+
+from botorch.utils.transforms import t_batch_mode_transform
+
+
+class ConstrainedAcquisitionFunction(acquisition.AcquisitionFunction):
+    def __init__(self, model):
+        '''
+        Acquisition function that biases away from points that were observed 
+        to not satisfy a given constraint.
+
+        Arguments
+        ---------
+        model : model
+            A fitted model, usually seperate from objective models
+
+        constraints: dict 
+            A dictionary of the form `{i: [lower, upper]}`, where
+            `i` is the output index, and `lower` and `upper` are lower and upper
+            bounds on that output (resp. interpreted as -Inf / Inf if None)
+
+        Shamelessly adapted/stolen from BoTorch ConstrainedEI
+        https://botorch.org/v/0.3.0/api/_modules/botorch/acquisition/analytic.html
+
+
+        '''
+        
+        super().__init__(model)
+        
+    @t_batch_mode_transform(expected_q=1)
+    def forward(self, X):
+        posterior = self.model.posterior(X)
+        means = posterior.mean.squeeze(dim = -2)
+        sigmas = posterior.variance.squeeze(dim = -2).sqrt().clamp_min(1e-9)
+
+        #ind = torch.arange(len(means))
+        #print(means.index_select(dim = -1, index = ind[:10]))
+        dists = self._construct_dist(means, sigmas, torch.arange(len(means)))
+        prob_feas = dists.cdf(torch.tensor(0.5))
+        #print(prob_feas)
+        
+        return 1.0 - prob_feas.squeeze(dim=-1)
+        
+    
+
+    def _construct_dist(self, means, sigmas, inds):
+        mean = means.flatten()#.index_select(dim = -1, index = inds)
+        sigma = sigmas.flatten()#.index_select(dim = -1, index = inds)
+        return Normal(loc = mean, scale = sigma)

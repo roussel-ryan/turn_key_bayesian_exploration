@@ -1,0 +1,36 @@
+import botorch
+import torch
+
+#define classes that combine acquisition functions
+
+class MultiplyAcquisitionFunction(botorch.acquisition.acquisition.AcquisitionFunction):
+    def __init__(self, model, acquisition_functions):
+        '''
+        Acquisition function class that combines several seperate acquisition functions
+        together by multiplying them
+
+        Arguments
+        ---------
+        acquisition_functions : list
+            List of acquisition functions to multiply together
+
+        '''
+
+        super().__init__(model)
+
+        #check to make sure that all of the acquisition_functions are using the same
+        #model
+        for function in acquisition_functions:
+            assert self.model is function.model
+        
+        self.acqisition_functions = acquisition_functions
+
+    def forward(self, X):
+        value = torch.ones(X.shape[0])
+
+        for function in self.acqisition_functions:
+            multiplier = function.forward(X)
+            print(multiplier)
+            value = value * multiplier
+
+        return value
