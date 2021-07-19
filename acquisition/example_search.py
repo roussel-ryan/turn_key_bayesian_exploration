@@ -18,7 +18,6 @@ import proximal
 
 
 def main():
-    # sigma_mult = [0.5**2]
     sigma_mult = [0.3 ** 2]
 
     n_init = 1
@@ -41,7 +40,7 @@ def main():
         ax = [ax]
 
     for i in range(len(sigma_mult)):
-        X, Y, mlls, cmlls = optimize(x_init, 5, torch.eye(2) * sigma_mult[i])
+        X, Y, mlls, cmlls = optimize(x_init, 35, torch.eye(2) * sigma_mult[i])
         ax[i].plot(X[:, 0][:n_init], X[:, 1][:n_init], '+C0')
         ax[i].plot(X[:, 0][n_init:], X[:, 1][n_init:], '+C1')
         ax[i].plot(X[:, 0][-1], X[:, 1][-1], 'oC1')
