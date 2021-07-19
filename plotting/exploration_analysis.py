@@ -48,7 +48,7 @@ def get_data(fname):
 
 
 def plot_valid_region(fname, ax):
-    c_fname = 'D:\\AWA\\mobo_04_15_21\\data\\2d_scan_big.pkl'
+    c_fname = 'D:\\AWA\\mobo_04_15_21\\data\\2d_scan.pkl'
 
     _, _, constr_x, constr_y, tx, ty, bad_data, good_data = get_data(c_fname)
     _, _, _, _, tx, ty, bad_data, good_data = get_data(fname)
@@ -95,7 +95,7 @@ def plot_valid_region(fname, ax):
     return c
 
 
-def add_valid_contour(ax, c_fname='D:\\AWA\\mobo_04_15_21\\data\\2d_scan_big.pkl'):
+def add_valid_contour(ax, c_fname='D:\\AWA\\mobo_04_15_21\\data\\2d_scan.pkl'):
     _, _, constr_x, constr_y, tx, ty, bad_data, good_data = get_data(c_fname)
 
     cgp = SingleTaskGP(constr_x, constr_y)
@@ -215,9 +215,9 @@ def plot_prediction(fname, xlim, ylim, ax, ax2, ax3, n=10):
 def plot_figure():
     folder = 'D:\\AWA\\mobo_04_15_21\\data\\'
     fname = 'binary_constraint_search.pkl'
-    fnames = ['2d_scan_big.pkl',
+    fnames = ['2d_scan.pkl',
               '2d_adapt_search.pkl',
-              '2d_adapt_search_2_sigma_0_01.pkl']
+              'bayes_exp.pkl']
 
     fig = plt.figure()
     fig.set_size_inches(8, 4)

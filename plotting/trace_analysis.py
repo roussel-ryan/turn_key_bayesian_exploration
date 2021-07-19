@@ -11,7 +11,7 @@ import transformer
 def track_data():
     folder = 'D:\\AWA\\mobo_04_15_21\\data\\'
     fname = 'binary_constraint_search.pkl'
-    fnames = ['2d_adapt_search_2_sigma_0_01.pkl', '2d_adapt_search.pkl']
+    fnames = ['bayes_exp.pkl', '2d_adapt_search.pkl']
 
     gs_kw = {'width_ratios': [1.0, 0.2]}
     fig, ax = plt.subplots(4, 2, gridspec_kw=gs_kw)
