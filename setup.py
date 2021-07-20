@@ -8,5 +8,5 @@ setup(
     license='',
     author='RyanRoussel',
     author_email='rroussel@uchicago.edu',
-    description='Files needed for reproducing results from cooresponding Nature Communications'
+    description='Files needed for reproducing results from Nature Communications paper: Turn-Key Constrained Parameter Space Exploration for Particle Accelerators Using Bayesian Active Learning'
 )
