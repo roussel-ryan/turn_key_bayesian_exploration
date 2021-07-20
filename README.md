@@ -4,7 +4,7 @@ It also contains a simple implementation of CPBE algorithm and a test problem to
 - [Overview](#overview)
 - [System Requirements](#system-requirements)
 - [Installation Guide](#installation-guide)
-- [Setting up the development environment](#setting-up-the-development-environment)
+- [Setting up the development environment](#setting-up-the-environment)
 - [License](#license)
 
 # Overview
