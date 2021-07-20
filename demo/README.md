@@ -1,4 +1,4 @@
-# demonstration scrips
+# Algorithm Demonstration Scrips
 
 ## Lengthscale Demonstration - lengthscale_demo_with_optimization.py
 Reproduces Figure 1 from the paper, showing how a posterior acquisition function behaves when the GP length scales for each axis are isotropic or anisotropic.
