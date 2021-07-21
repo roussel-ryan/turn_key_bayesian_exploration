@@ -26,6 +26,7 @@ This package is supported for any systems that can run python > 3.7. The package
 # Installation Guide:
 
 ### Install from Github
+Should take < 1 min
 ```
 git clone https://github.com/roussel-ryan/turn_key_bayesian_exploration.git
 cd turn_key_bayesian_exploration
@@ -35,6 +36,7 @@ python3 setup.py install
 # Setting up the environment:
 - Install Miniconda https://docs.conda.io/en/latest/miniconda.html
 - Create and activate environment
+- Should take < 10 min
 ```
 conda env create -f environment.yml
 conda activate cpbe
