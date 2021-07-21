@@ -9,7 +9,10 @@ It also contains a simple implementation of CPBE algorithm and a test problem to
 
 # Overview
 The ``CPBE`` algorithm aims to be an algorithm that replaces common multi-parameter scans in order to characterize a target function. It adaptively samples input space to maximize information gain about the target function, respects unknown constraints in input space, and biases towards making small jumps in input space.
-
+## Repository contents
+- data/ contains raw experimental measurements of the beam emittance as a function of input parameters for both the 2D scan case and the 4D CPBE case.
+- demo/ contains an implementation of CPBE and a script to demonstrate its use in a simple exploration problem (see README in folder for details)
+- plotting/ contains scripts used to generate plots in the paper
 
 # System Requirements
 ## Hardware requirements
