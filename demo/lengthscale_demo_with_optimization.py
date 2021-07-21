@@ -77,7 +77,7 @@ for ax, l in zip(axes, ls):
         post = lk(model(pts))
         std = torch.sqrt(post.variance)
 
-    c = ax.pcolor(*xx, std.reshape(n, n) / torch.max(std),vmin = 0, vmax = 1)
+    c = ax.pcolor(*xx, std.reshape(n, n) / torch.max(std), vmin=0, vmax=1)
     ax.plot(*test_x[:5].numpy().T, 'C0o')
     ax.plot(*test_x[5:].numpy().T, 'C1o')
 
@@ -86,15 +86,7 @@ for ax, l in zip(axes, ls):
     fig.colorbar(c, ax=ax, label='$\sigma\ (\mathbf{x}) / \sigma_{max}$')
     ax.set_aspect('equal')
 
-
-#l = ['a', 'b']
-#for a, label1 in zip(axes, l):
-#    a.text(-0.15, 1.05, f'({label1})', ha='right',
-#           va='top', transform=a.transAxes,
-#           fontdict={'size': 12})
-
 fig.tight_layout()
-fig.savefig('lengthscale.svg')
-fig.savefig('lengthscale.png', dpi=600)
+fig.savefig('results/lengthscale.png', dpi=600)
 
 plt.show()

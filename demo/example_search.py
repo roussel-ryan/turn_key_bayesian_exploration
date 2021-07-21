@@ -25,7 +25,6 @@ def main():
     x_init = torch.tensor((0.5, 0.4)).reshape(1, -1)
 
     fig, ax = plt.subplots(len(sigma_mult), 1)
-    fig2, ax2 = plt.subplots()
 
     if isinstance(ax, np.ndarray):
         for a in ax.flatten():
@@ -44,9 +43,6 @@ def main():
         ax[i].plot(X[:, 0][:n_init], X[:, 1][:n_init], '+C0')
         ax[i].plot(X[:, 0][n_init:], X[:, 1][n_init:], '+C1')
         ax[i].plot(X[:, 0][-1], X[:, 1][-1], 'oC1')
-
-        #ax2.plot(np.exp(mlls) / np.arange(1, len(mlls) + 1))
-        #ax2.plot(np.exp(cmlls) / np.arange(1, len(cmlls) + 1))
 
 
 def f(X):
@@ -74,13 +70,16 @@ def optimize(x_initial, n_steps, sigma_matrix):
 
         # define gp model for objective(s)
         gp = SingleTaskGP(train_X, train_Y[:, 0].reshape(-1, 1))
-        mll_val = fit_gp(gp)
-        #mlls += [mll_val]
+
+        mll = ExactMarginalLogLikelihood(gp.likelihood, gp)
+        fit_gpytorch_model(mll)
 
         # define constraint GP
         cgp = SingleTaskGP(train_X, train_Y[:, 1].reshape(-1, 1))
-        cmll_val = fit_gp(cgp)
-        #cmlls += [cmll_val]
+
+        cmll = ExactMarginalLogLikelihood(cgp.likelihood, cgp)
+        fit_gpytorch_model(cmll)
+
         # get candidate for observation and add to training data
         if i % 10 == 0:
             plot = False
@@ -90,8 +89,6 @@ def optimize(x_initial, n_steps, sigma_matrix):
         candidate = max_acqf(gp, cgp, sigma_matrix, plot=plot)
         train_X = torch.cat((train_X, candidate))
         train_Y = f(train_X)
-
-    # plot_model(cgp, lk, train_X)
 
     plot_func(train_X)
 
@@ -103,14 +100,12 @@ def optimize(x_initial, n_steps, sigma_matrix):
 
 
 def max_acqf(gp, cgp, sigma_matrix, plot=False):
-    # finds new canidate point based on EHVI acquisition function
+    # finds new canidate point based on CPBE acquisition function
 
     constr = binary_constraint.BinaryConstraint(cgp)
-    # constr = PosteriorMean(cgp)
     prox = proximal.ProximalAcqusitionFunction(gp, sigma_matrix)
-    UCB = UpperConfidenceBound(gp, beta=1e6)
+    UCB = UpperConfidenceBound(gp, beta=1e9)
     comb = combine_acquisition.MultiplyAcquisitionFunction(gp, [constr, prox, UCB])
-    # comb = combine_acquisition.MultiplyAcquisitionFunction(gp, [UCB])
 
     bounds = torch.stack([torch.zeros(2), torch.ones(2)])
 
@@ -193,8 +188,6 @@ def plot_acq(func, bounds, obs):
     pts = np.vstack((xx.ravel(), yy.ravel())).T
     pts = torch.from_numpy(pts).float()
 
-    # print(pts)
-
     f = torch.zeros(n ** 2)
     for i in range(pts.shape[0]):
         f[i] = func(pts[i].reshape(1, -1))
@@ -203,6 +196,7 @@ def plot_acq(func, bounds, obs):
 
     ax.set_title(type(func))
     fig.colorbar(c)
+    fig.savefig(f'results/{type(func).__name__}.png')
 
 
 main()
