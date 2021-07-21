@@ -1,24 +1,26 @@
-import numpy as np
+import os
+
+import matplotlib as mpl
+import matplotlib.gridspec as gridspec
 import matplotlib.pyplot as plt
+import numpy as np
 import pandas as pd
 import torch
-
-from botorch.models import SingleTaskGP
 from botorch.fit import fit_gpytorch_model
+from botorch.models import SingleTaskGP
 from gpytorch.mlls import ExactMarginalLogLikelihood
 
 import transformer
 
-import matplotlib as mpl
-import matplotlib.gridspec as gridspec
-
 mpl.rc('image', cmap='Greens')
+
+data_folder = os.path.join(os.getcwd(), '../data/')
 
 
 def get_data(fname):
     data = pd.read_pickle(fname)
     if 'scan' not in fname:
-        data = data#.iloc[:250]
+        data = data  # .iloc[:250]
 
     # select good data
 
@@ -33,7 +35,7 @@ def get_data(fname):
         train_x = torch.from_numpy(good_data[['FocusingSolenoid', 'MatchingSolenoid']].to_numpy())
         constraint_x = torch.from_numpy(data[['FocusingSolenoid', 'MatchingSolenoid']].to_numpy())
 
-    train_y = 2.0*torch.from_numpy(good_data[['EMIT']].to_numpy())
+    train_y = 2.0 * torch.from_numpy(good_data[['EMIT']].to_numpy())
     constraint_y = torch.from_numpy(data[['IMGF']].to_numpy())
 
     # normalize
@@ -48,7 +50,7 @@ def get_data(fname):
 
 
 def plot_valid_region(fname, ax):
-    c_fname = 'D:\\AWA\\mobo_04_15_21\\data\\2d_scan.pkl'
+    c_fname = data_folder + '2d_scan.pkl'
 
     _, _, constr_x, constr_y, tx, ty, bad_data, good_data = get_data(c_fname)
     _, _, _, _, tx, ty, bad_data, good_data = get_data(fname)
@@ -95,7 +97,7 @@ def plot_valid_region(fname, ax):
     return c
 
 
-def add_valid_contour(ax, c_fname='D:\\AWA\\mobo_04_15_21\\data\\2d_scan.pkl'):
+def add_valid_contour(ax, c_fname=data_folder + '2d_scan.pkl'):
     _, _, constr_x, constr_y, tx, ty, bad_data, good_data = get_data(c_fname)
 
     cgp = SingleTaskGP(constr_x, constr_y)
@@ -131,11 +133,11 @@ def add_valid_contour(ax, c_fname='D:\\AWA\\mobo_04_15_21\\data\\2d_scan.pkl'):
                        alpha=0.5)
 
         a.contour(pts[:, 0].reshape(n, n),
-                   pts[:, 1].reshape(n, n),
-                   prob.numpy().reshape(n, n),
-                   levels=[0.5],
-                   linestyles='dashed',
-                   cmap='cividis')
+                  pts[:, 1].reshape(n, n),
+                  prob.numpy().reshape(n, n),
+                  levels=[0.5],
+                  linestyles='dashed',
+                  cmap='cividis')
 
         a.set_xlim(*xlim)
         a.set_ylim(*ylim)
@@ -173,7 +175,7 @@ def plot_prediction(fname, xlim, ylim, ax, ax2, ax3, n=10):
     c = ax.pcolor(pts[:, 0].reshape(n, n),
                   pts[:, 1].reshape(n, n),
                   mean.numpy().reshape(n, n),
-                  vmin=9*2, vmax=26*2)
+                  vmin=9 * 2, vmax=26 * 2)
     sample_x = tx.backward(train_x)
 
     ax.plot(sample_x.T[0], sample_x.T[1], 'C1o', ms=3, label='Valid')
@@ -196,16 +198,16 @@ def plot_prediction(fname, xlim, ylim, ax, ax2, ax3, n=10):
              histtype='stepfilled',
              orientation='horizontal')
 
-    #ax2.hist(good_data['FocusingSolenoid'], density=False, bins=19, rwidth=1.0,
+    # ax2.hist(good_data['FocusingSolenoid'], density=False, bins=19, rwidth=1.0,
     #         color='C1', range=xlim, histtype='stepfilled')
-    #ax3.hist(good_data['MatchingSolenoid'], density=False, bins=19, rwidth=1.0,
+    # ax3.hist(good_data['MatchingSolenoid'], density=False, bins=19, rwidth=1.0,
     #         range=ylim, histtype='stepfilled', color='C1',
     #         orientation='horizontal')
 
     # ax2.hist(bad_data['FocusingSolenoid'], density=False, bins=19, rwidth=1.0,
     # color='C4', range=xlim,
     # histtype='stepfilled', alpha = 0.5)
-    #ax3.hist(bad_data['MatchingSolenoid'], density=False, bins=19, rwidth=1.0,
+    # ax3.hist(bad_data['MatchingSolenoid'], density=False, bins=19, rwidth=1.0,
     #         range=ylim, histtype='stepfilled', color='C4',
     #         orientation='horizontal', alpha=0.5)
 
@@ -213,10 +215,8 @@ def plot_prediction(fname, xlim, ylim, ax, ax2, ax3, n=10):
 
 
 def plot_figure():
-    folder = 'D:\\AWA\\mobo_04_15_21\\data\\'
-    fname = 'binary_constraint_search.pkl'
+
     fnames = ['2d_scan.pkl',
-              '2d_adapt_search.pkl',
               'bayes_exp.pkl']
 
     fig = plt.figure()
@@ -232,7 +232,7 @@ def plot_figure():
     xlim = (6.05, 9.07)
     ylim = (1.0, 2.5)
 
-    for name, i in zip(fnames[::2], [0, 1]):
+    for name, i in zip(fnames, [0, 1]):
         gs00 = gs0[i].subgridspec(2, 3,
                                   width_ratios=[0.3, 1.0, 0.1],
                                   height_ratios=[0.3, 1.0][::-1],
@@ -258,7 +258,7 @@ def plot_figure():
         ax3.set_ylabel('K1 (arb. u.)')
         ax3.set_xticks([1])
 
-        c = plot_prediction(folder + name, xlim, ylim, ax1, ax2, ax3, 300)
+        c = plot_prediction(data_folder + name, xlim, ylim, ax1, ax2, ax3, 300)
         ax3.set_xlim(ax3.get_xlim()[::-1])
         # ax2.set_ylim(ax2.get_ylim()[::-1])
 
